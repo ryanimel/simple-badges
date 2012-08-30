@@ -3,7 +3,7 @@
 Plugin Name: Simple Badges
 Plugin URI: http://wordpress.org/extend/plugins/simple-badges
 Description: Award badges to users based on simple scenarios that you can build yourself.
-Version: 0.1
+Version: 0.1-alpha20120830
 Author: Ryan Imel
 Author URI: http://wpcandy.com
 License: GPLv2 or later
