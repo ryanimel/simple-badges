@@ -409,6 +409,7 @@ class SimpleBadges {
 		// Those not belonging to the displayed user.
 		$sbargs = array(
 			'post_type' => 'simplebadges_badge',
+			'posts_per_page'=> -1
 		);
 				
 		$sb_query = new WP_Query( $sbargs );
