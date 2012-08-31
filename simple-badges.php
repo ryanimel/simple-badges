@@ -354,6 +354,7 @@ class SimpleBadges {
 		if ( !( is_author() ) )
 			return;
 		
+		// Checks to see if badges need updating on page load. If so, do it.
 		$this->badge_users_update();
 		
 		// Pull the array of badges from user meta, save it.
@@ -417,13 +418,15 @@ class SimpleBadges {
 	
 	
 	/**
-	 * Update users per badge
+	 * Toggle user ownership of badges.
 	 *
+	 * This occurs during the display of the author archive page.
+	 * 
 	 */
-	public function badge_users_update() {
+	private function badge_users_update() {
 		
 		// If true, then we can toggle based on the user and the badge info.
-		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) ) {
+		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) &&  ) {
 			
 			if( check_admin_referer( 'simplebadges_nonce_url' ) ) {
 				
@@ -456,8 +459,12 @@ class SimpleBadges {
 	
 	
 	/**
-	 * Filter the display of badges
+	 * Filter the display of badges.
 	 *
+	 * Adds badges to the output on badge archive pages. Filters the $content and 
+	 * first displays the $badge_image, then the $content, then $badge_winners.
+	 * 
+	 * @return 
 	 */
 	public function badge_post_display( $content ) {
 		
