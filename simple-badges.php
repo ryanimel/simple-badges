@@ -537,7 +537,7 @@ class SimpleBadges {
 	/**
 	 * Clear out other badge owners, for roaming badges.
 	 * 
-	 * 
+	 * @param $badge_id @user_id
 	 */
 	public function badge_roaming( $badge_id, $user_id ) {
 		
