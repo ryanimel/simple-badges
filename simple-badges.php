@@ -346,12 +346,9 @@ class SimpleBadges {
 		while ( $sb_query->have_posts() ) :$sb_query->the_post();
 			
 			$badge_id = get_the_ID();
-			$badge_image = get_the_post_thumbnail( $badge_id, array( 151, 154 ) );
-			$badge_title = get_the_title( $badge_id );
-			$badge_dimension = '30';
+			$badge_title = get_the_title( $badge_id );			
 			$badge_description = get_the_content( $badge_id );
 			$badge_permalink = get_permalink( $badge_id );
-			$badge_hidden = get_post_meta( $badge_id, 'simplebadges_badge_hidetoggle', true );
 			
 			// Build the list items
 			if ( in_array( $badge_id, $user_badges ) ) {	
