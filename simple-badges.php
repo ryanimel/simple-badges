@@ -2,13 +2,17 @@
 /* 
 Plugin Name: Simple Badges
 Plugin URI: http://wordpress.org/extend/plugins/simple-badges
-Description: Award badges to users based on simple scenarios that you can build yourself.
+Description: Award badges to users based on simple scenarios that you can build yourself. Includes the Custom Metabox and Fields script (https://github.com/jaredatch/Custom-Metaboxes-and-Fields-for-WordPress).
 Version: 0.1
 Author: Ryan Imel
 Author URI: http://wpcandy.com
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
+
+// TODO
+// Create a view for all badges, taking into account that some are hidden until they are awarded.
+// Start the automatically awarded badge function.
 
 
 // sb_rwi_namespace
@@ -20,7 +24,6 @@ class SimpleBadges {
 	 * Static property to hold our singleton instance
 	 * @var SimpleBadges
 	 */
-	 
 	static $instance = false;
 	 
 	 
@@ -30,7 +33,6 @@ class SimpleBadges {
 	 * 
 	 * @return SimpleBadges
 	*/
-	
 	private function __construct() {
 		add_action( 'init', array( $this, 'post_types' ) );
 		// to make sure the thumbnail option displays for our badge post type
@@ -40,42 +42,95 @@ class SimpleBadges {
 		add_action( 'save_post', array( $this, 'metabox_save' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 		add_filter( 'the_content', array( $this, 'badge_post_display' ) );
+		add_action( 'init', array( $this, 'cmb_initialize_cmb_meta_boxes' ), 9999 );
+		add_filter( 'cmb_meta_boxes', array( $this, 'cmb_sample_metaboxes' ) );
 	}
 	
 	
-	/*
+	/**
 	 * If an instance exists, this returns it. If not, it creates one and 
 	 * returns it.
 	 *
 	 * @return SimpleBadges
 	 */
-	 
 	 public static function getInstance() {
 	 	if ( !self::$instance )
 	 		self::$instance = new self;
 	 	return self::$instance;
 	 }
+	
+	
+	/**
+	 * Define the metabox and field configurations.
+	 *
+	 * @param  array $meta_boxes
+	 * @return array
+	 */
+	function cmb_sample_metaboxes( array $meta_boxes ) {
+
+		// Start with an underscore to hide fields from custom fields list
+		$prefix = '_cmb_';
+
+		$meta_boxes[] = array(
+			'id'         => 'test_metabox',
+			'title'      => 'Test Metabox',
+			'pages'      => array( 'simplebadges_badge', ), // Post type
+			'context'    => 'normal',
+			'priority'   => 'high',
+			'show_names' => true, // Show field names on the left
+			'fields'     => array(
+				array(
+					'name' => 'Test Text',
+					'desc' => 'field description (optional)',
+					'id'   => $prefix . 'test_text',
+					'type' => 'text',
+				),
+				array(
+					'name' => 'Test Text Small',
+					'desc' => 'field description (optional)',
+					'id'   => $prefix . 'test_textsmall',
+					'type' => 'text_small',
+				),
+			),
+		);
+
+		// Add other metaboxes as needed
+
+		return $meta_boxes;
+	}
+	
+	
+	/**
+	 * Initialize the metabox class.
+	 */
+	function cmb_initialize_cmb_meta_boxes() {
+
+		if ( ! class_exists( 'cmb_Meta_Box' ) )
+			require_once 'metabox/custom-metaboxes-and-fields.php';
+
+	}
 	 
 	
-	/*
-	 * Javascript for this plugin.
+	/**
+	 * Enqueue the javascript for the admin pages of this plugin.
 	 *
+	 * @global $typenow, $pagenow
 	 */
-	 
 	public function scripts() {
-		global $typenow, $pagenow;
-		if( ($pagenow == 'post-new.php' || $pagenow == 'post.php') && $typenow == 'simplebadges_badge' )
 		
-		wp_enqueue_script( 'simplebadges-admin-scripts', plugins_url( '/js/simplebadges-admin.js', __FILE__ ) , array( 'jquery' ), 0.2, true );
+		global $typenow, $pagenow;
+		
+		if( ($pagenow == 'post-new.php' || $pagenow == 'post.php') && $typenow == 'simplebadges_badge' )
+			wp_enqueue_script( 'simplebadges-admin-scripts', plugins_url( '/js/simplebadges-admin.js', __FILE__ ) , array( 'jquery' ), 0.2, true );
 	
 	}
 	 
 	 
-	 /*
-	  * Spin up a new custom post type.
-	  *
-	  */
-	 
+	/**
+	 * Spin up a new custom post type.
+	 *
+	 * @static register_post_type
+	 */
 	public function post_types() {
 	 	
 		// Badges post type
@@ -152,12 +207,12 @@ class SimpleBadges {
 	 	// See http://codex.wordpress.org/Function_Reference/register_post_type
 	 	
 	}
-	 
-	 
-	 /*
-	  * Metabox fields
-	  * 
-	  */
+	
+	
+	/**
+	 * (Old) Metabox fields
+	 * 
+	 */
 		
 		public $metabox_fields = array(
 		
@@ -218,131 +273,17 @@ class SimpleBadges {
 			)
 		
 		);
+		
 	
-	
-	
-	/*
-	 * Add meta box 
-	 * 
-	 */
-	
-	public function metabox_add() {
-			
-		add_meta_box( $this->metabox_fields['id'], $this->metabox_fields['title'], array( $this, 'metabox_display' ), $this->metabox_fields['page'], $this->metabox_fields['context'], $this->metabox_fields['priority'] );
-	
-	}
-	
-	
-	/*
-	 * Display meta box
+	/**
+	 * Returns the small badge image size.
 	 *
-	 */  
-	
-	public function metabox_display() {
-	
-		global $post;
-		
-		echo '<input type="hidden" name="simplefields_metabox_nonce" value="', wp_create_nonce( basename(__FILE__)), '" />';
-		echo '<table class="form-table">';
-		
-		foreach ( $this->metabox_fields['fields'] as $field ) {
-		
-			$meta = get_post_meta( $post->ID, $field['id'], true );
-			
-			echo '<tr>',
-				'<th style="width:20%">',
-					'<label for="', $field['id'], '">', esc_attr( $field['name'] ), '</label>',
-				'</th>',
-				'<td>';
-				
-			// Depending on what inputs are dropped into our box
-			switch ( $field['type'] ) {
-			
-				case 'text' : 
-					echo '<input type="text" name"', $field['id'], '" id="', $field['id'], '" value="';
-					echo esc_attr( $meta );
-					echo '" size="30" style="width: 12%" />', '<br />', $field['desc'];
-					break;
-					
-				case 'textarea' :
-					echo '<textarea name="', $field['id'], '" id="', $field['id'], '" cols="60" rows="4" style="width: 97%">', $meta ? $meta : $field['std'], '</textarea>', '<br />', $field['desc'];
-					break;
-					
-				case 'select' : 
-					echo '<select name="', $field['id'], '" id="', $field['id'], '">';
-					
-					foreach ( $field['options'] as $option ) {
-						echo '<option', $meta == $option ? ' selected="selected"' : '', '>', $option, '</option>';
-					}
-					echo '</select>';
-					break;
-					
-				case 'radio' :
-					foreach ( $field['options'] as $option ) {
-					
-					$checkedvalue = '';
-					if ( ( !($meta) && $field['std'] == $option['value'] ) || $meta == $option['value'] ) {
-						$checkedvalue .= ' checked="checked"';
-					}
-					
-						echo '<input type="radio" name="', $field['id'], '" id="', $option['value'], '" value="', $option['value'], '"', $checkedvalue, ' />&nbsp;<label for="', $option['value'], '">', $option['value'], '</label><br />';
-					}
-					break;
-					
-				case 'checkbox' :
-					echo '<input type="checkbox" name="', $field['id'], '" id="', $field['id'], '"', $meta ? ' checked="checked"' : '', ' />';
-					echo '<label for="', $field['id'], '" id="', $field['id'], '-label">&nbsp;', $field['desc'], '</label>';
-					break;
-			
-			}
-			
-			echo '</td></tr>';
-
-		}
-		
-		echo '</table>';
-	
-	}
-	
-	
-	/*
-	 * Save the metabox
+	 * When given a badge ID and badge dimension (square), returns
+	 * the badge image formatted in HTML.
 	 *
-	 */
-	 
-	public function metabox_save( $post_id ) {
-		
-		if ( !wp_verify_nonce( $_POST[ 'simplefields_metabox_nonce' ], basename(__FILE__) ) ) {
-			return $post_id;
-		}
-		
-		if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) {
-			return $post_id;
-		}
-		
-		if ( 'page' == $_POST['post_type'] ) {
-			if( !current_user_can( 'edit_post', $post_id ) ) {
-				return $post_id;
-			}
-		} elseif ( !current_user_can( 'edit_post', $post_id ) ) {
-			return $post_id;
-		}
-		
-		foreach ( $this->metabox_fields['fields'] as $field ) {
-			$old = get_post_meta( $post_id, $field['id'], true );
-			$new = $_POST[$field['id']];
-			if ( $new && $new != $old ) {
-				update_post_meta( $post_id, $field['id'], $new );
-			} elseif ( '' == $new && $old ) {
-				delete_post_meta( $post_id, $field['id'], $old );
-			}
-			
-		}
-		
-	}
-	
-	
-	
+	 * @param $badge_id, $badge_dimension
+	 * @return $badge_image_small
+	 */	
 	public function badge_thumb( $badge_id, $badge_dimension ) {
 	
 		// Locate the right small badge image
@@ -357,6 +298,15 @@ class SimpleBadges {
 	}
 	
 	
+	/**
+	 * Returns the edit link for toggling a badge.
+	 *
+	 * Provided a badge ID and author ID, this function provides the toggle/edit
+	 * link for that particular coupling. 
+	 *
+	 * @param $badge_id, $author_id, $toggle_text
+	 * @return $badge_link
+	 */
 	public function badge_edit_link( $badge_id, $author_id, $toggle_text ) {
 	
 		if ( current_user_can( 'manage_options' ) ) {
@@ -372,6 +322,9 @@ class SimpleBadges {
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public function badge_protect( $content ) {
 	
 		if ( current_user_can( 'manage_options' ) ) {
@@ -387,11 +340,14 @@ class SimpleBadges {
 	}
 	
 	
-	/*
-	 * Display badges on the author archive page
+	/**
+	 * Display badges on the author archive page.
+	 * 
 	 * Accepts return true/false to enable returning the output instead of echoing it.
+	 * 
+	 * @param $return = false
+	 * @return $output
 	 */
-	
 	public function author_archive_display( $return = false ) {
 		
 		// This thing won't have anything to do if it's used outside of an author page.
@@ -421,6 +377,7 @@ class SimpleBadges {
 			$badge_dimension = '30';
 			$badge_description = get_the_content( $badge_id );
 			$badge_permalink = get_permalink( $badge_id );
+			$badge_hidden = get_post_meta( $badge_id, 'simplebadges_badge_hidetoggle', true );
 			
 			// Build the list items
 			if ( in_array( $badge_id, $user_badges ) ) {	
@@ -433,7 +390,7 @@ class SimpleBadges {
 				
 				$badge_link = $this->badge_edit_link( $badge_id, $author_id, '+' );
 				$badge_thumb = $this->badge_thumb( $badge_id, '30' );
-				$not_list .= '<li class="badge-card"><a href="' . $badge_permalink . '">' . $badge_thumb . '</a><p><a href="' . $badge_permalink . '">' . $badge_title . '</a></p>' . $badge_link . '</li>';
+				$not_list .= '<li class="badge-card"><a href="' . $badge_permalink . '">' . $badge_thumb . '</a><p><a href="' . $badge_permalink . '">' . $badge_title . $badge_hidden . '</a></p>' . $badge_link . '</li>';
 			
 			}
 			
@@ -459,11 +416,10 @@ class SimpleBadges {
 	}
 	
 	
-	/*
+	/**
 	 * Update users per badge
 	 *
 	 */
-	
 	public function badge_users_update() {
 		
 		// If true, then we can toggle based on the user and the badge info.
@@ -475,28 +431,17 @@ class SimpleBadges {
 				$badge_toggle_user_id = $_GET[badgeuser];
 				$badge_toggle_badge_id = $_GET[badge];
 			
-				// Debug. Tap tap?
-				//echo 'User: ' . $badge_toggle_user_id . ' Badge: ' . $badge_toggle_badge_id;
-				
-				// Grab and store the array of the user's badges from their meta.
-				// See if the badge id in question is in their array or not.
-				// If if isn't, add it.
-				// If it is, remove  it.
-
 				// Grab this badge's list of user IDs
-				// OLD: $badge_toggle_users = get_post_meta( $badge_toggle_badge_id, 'simplebadges_badge_users_frl', false );
 				$user_badges = get_user_meta( $badge_toggle_user_id, 'simplebadges_badges', false );
 							
 				if ( in_array( $badge_toggle_badge_id, $user_badges ) ) {
 					
 					// Let's toggle and remove the author
-					// OLD delete_post_meta( $badge_toggle_badge_id, 'simplebadges_badge_users_frl', $badge_toggle_user_id );
 					delete_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
 										
 				} else {
 					
 					// Toggle and add the author
-					// OLD add_post_meta( $badge_toggle_badge_id, 'simplebadges_badge_users_frl', $badge_toggle_user_id );	
 					add_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
 					
 					do_action( 'simplebadges_after_adding', $badge_toggle_user_id, $badge_toggle_badge_id );
@@ -510,11 +455,10 @@ class SimpleBadges {
 	}
 	
 	
-	/*
+	/**
 	 * Filter the display of badges
 	 *
 	 */
-	
 	public function badge_post_display( $content ) {
 		
 		if ( !( is_post_type_archive( 'simplebadges_badge' ) || ( is_single() && ( 'simplebadges_badge' == get_post_type() ) )  ) )
@@ -550,7 +494,6 @@ $SimpleBadges = SimpleBadges::getInstance();
 
 
 // Simple Badges display function
-// Just a wrapper for what's in the class.
 function simplebadges_user() {
 	global $SimpleBadges;
 	
@@ -558,17 +501,4 @@ function simplebadges_user() {
 		return $SimpleBadges->author_archive_display();
 	}
 }
-
-
-// Simple Badges display function
-// Just a wrapper for what's in the class.
-function simplebadges_debug() {
-	global $SimpleBadges;
-	
-	if ( $SimpleBadges ) {
-//		return $SimpleBadges->badge_users_update();
-	}
-}
-
-
 
