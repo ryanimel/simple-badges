@@ -311,7 +311,7 @@ class SimpleBadges {
 	
 		if ( current_user_can( 'manage_options' ) ) {
 					
-			$badge_link_url = parse_url( $_SERVER[ 'REQUEST_URI' ],PHP_URL_PATH ) . '?badge=' . $badge_id . '&badgeuser=' . $author_id;
+			$badge_link_url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH ) . '?badge=' . $badge_id . '&badgeuser=' . $author_id;
 			$badge_link_url_verified = wp_nonce_url( $badge_link_url, 'simplebadges_nonce_url' );
 			$badge_link = '<a class="badge-toggle" href="' . $badge_link_url_verified . '">' . $toggle_text . '</a>';
 			
@@ -324,6 +324,8 @@ class SimpleBadges {
 	
 	/**
 	 * 
+	 * @param $content
+	 * @return $content, false
 	 */
 	public function badge_protect( $content ) {
 	
