@@ -604,7 +604,7 @@ class SimpleBadges {
 // end class
 }
 
-// Instnatiate our class
+// Instantiate our class
 $SimpleBadges = SimpleBadges::getInstance();
 
 
