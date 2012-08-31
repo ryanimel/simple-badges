@@ -332,7 +332,7 @@ class SimpleBadges {
 		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
 		
 		// Pull the ID from the slug.
-		$author_id = $archive_slug->ID;		
+		$author_id = $author_slug->ID;		
 		$user_badges = get_user_meta( $author_id, 'simplebadges_badges', false );		
 		
 		// Those not belonging to the displayed user.
