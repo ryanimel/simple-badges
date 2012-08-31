@@ -44,6 +44,7 @@ class SimpleBadges {
 		add_filter( 'cmb_meta_boxes', array( $this, 'metaboxes' ) );
 		add_action( 'simplebadges_before_adding', array( $this, 'badge_roaming' ), 2, 9999 );
 		add_action( 'wp_head', array( $this, 'badge_users_pageload' ), 9999 );
+		//add_action( 'wp_head', array( $this, 'if_user_post_count' ), 9999 );
 	}
 	
 	
@@ -479,11 +480,17 @@ class SimpleBadges {
 		// Action so we can do cool stuff when this happens.
 		do_action( 'simplebadges_before_adding', $badge_id, $user_id );
 		
-		// Updates user meta with badge id.
-		add_user_meta( $user_id, 'simplebadges_badges', $badge_id );
+		$badges = get_user_meta( $user_id, 'simplebadges_badges', false );
+		
+		if ( ! in_array( $badge_id, $badges ) ) {
+		
+			// Updates user meta with badge id.
+			add_user_meta( $user_id, 'simplebadges_badges', $badge_id, false );
+		
+			// Action so we can do cool stuff when this happens.
+			do_action( 'simplebadges_after_adding', $badge_id, $user_id );
 			
-		// Action so we can do cool stuff when this happens.
-		do_action( 'simplebadges_after_adding', $badge_id, $user_id );
+		}
 		
 	}
 	
@@ -493,7 +500,7 @@ class SimpleBadges {
 	 * 
 	 * @param @badge_id @user_id
 	 */
-	private function badge_remove( $badge_id, $user_id) {
+	private function badge_remove( $badge_id, $user_id ) {
 		
 		// Action so we can do cool stuff when this happens.
 		do_action( 'simplebadges_before_removing', $badge_id, $user_id );
@@ -537,7 +544,7 @@ class SimpleBadges {
 	
 	
 	/**
-	 * Clear out other badge owners, for roaming badges.
+	 * Checks for a roaming badge, if so removes everyone the badge from others.
 	 * 
 	 * @param $badge_id @user_id
 	 */
@@ -550,16 +557,48 @@ class SimpleBadges {
 		// If the value = roaming, or if roaming is on
 		if ( ( $values ) && ( in_array ( $roaming, $values ) ) ) {
 			
-			$blogusers = get_users();
+			$users = get_users();
 
-			foreach ($blogusers as $bloguser) {
+			foreach ($users as $user) {
 
-				$id = $bloguser->ID;
+				$id = $user->ID;
 				// Let's toggle and remove the badge
 				$this->badge_remove( $badge_id, $id );
 
 			}
 			
+		}
+		
+	}
+	
+	
+	/**
+	 * Automatically awards a badge when a user has more than one post.
+	 * 
+	 * This is to test an idea.
+	 * 
+	 * @param
+	 */
+	public function if_user_post_count( $argument, $value ) {
+		
+		$users = get_users();
+						
+		if ( ! ( isset( $_GET[ 'badgeuser' ] ) && isset( $_GET[ 'badge' ] ) ) ) {
+							
+			foreach ( $users as $user ) {
+				
+				$badge_id = 18;
+				$user_id = $user->ID;
+				$count = count_user_posts( $user_id );
+				
+				if ( $count > '0' ) {
+									
+					$this->badge_add( $badge_id, $user_id );
+				
+				}
+				
+			}
+							
 		}
 		
 	}
