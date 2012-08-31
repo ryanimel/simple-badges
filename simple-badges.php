@@ -328,10 +328,11 @@ class SimpleBadges {
 		// Checks to see if badges need updating on page load. If so, do it.
 		$this->badge_users_update();
 		
-		// Pull the array of badges from user meta, save it.
-		$archive_author = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
+		// Get the author's slug (can't always rely on this in other ways).
+		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
 		
-		$author_id = $archive_author->ID;		
+		// Pull the ID from the slug.
+		$author_id = $archive_slug->ID;		
 		$user_badges = get_user_meta( $author_id, 'simplebadges_badges', false );		
 		
 		// Those not belonging to the displayed user.
