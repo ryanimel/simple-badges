@@ -401,11 +401,8 @@ class SimpleBadges {
 			$user_id = $_GET[badgeuser];
 			$badge_id = $_GET[badge];
 			
-			// Grab this badge's list of user IDs
-			$badges = get_user_meta( $user_id, 'simplebadges_badges', false );
-			
 			// Toggle badge
-			$this->badge_toggle( $badge_id, $user_id, $badges );
+			$this->badge_toggle( $badge_id, $user_id );
 							
 		}
 			
@@ -453,7 +450,10 @@ class SimpleBadges {
 	 * 
 	 * @param @badge_id @user_id
 	 */
-	private function badge_toggle( $badge_id, $user_id, $badges ) {
+	private function badge_toggle( $badge_id, $user_id ) {
+		
+		// Grab the user's badges.
+		$badges = get_user_meta( $user_id, 'simplebadges_badges', false );
 		
 		if ( in_array( $badge_id, $badges ) ) {
 				
