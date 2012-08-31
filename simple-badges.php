@@ -473,6 +473,9 @@ class SimpleBadges {
 	 */
 	private function badge_add( $badge_id, $user_id) {
 		
+		// Action so we can do cool stuff when this happens.
+		do_action( 'simplebadges_before_adding', $user_id, $badge_id );
+		
 		// Updates user meta with badge id.
 		add_user_meta( $user_id, 'simplebadges_badges', $badge_id );
 			
@@ -488,6 +491,9 @@ class SimpleBadges {
 	 * @param @badge_id @user_id
 	 */
 	private function badge_remove( $badge_id, $user_id) {
+		
+		// Action so we can do cool stuff when this happens.
+		do_action( 'simplebadges_before_removing', $user_id, $badge_id );
 		
 		// Updates user meta with badge id.
 		delete_user_meta( $user_id, 'simplebadges_badges', $badge_id );
