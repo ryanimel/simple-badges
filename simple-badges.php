@@ -416,7 +416,8 @@ class SimpleBadges {
 		
 		// Pull the ID from the slug.
 		$author_id = $author_slug->ID;				
-			
+		
+		// Build out the display.
 		$owned_list = $this->badges_owned( $author_id );
 		$not_list = $this->badges_unowned( $author_id );
 		$protect_list = $this->badge_protect( $not_list );
@@ -549,6 +550,7 @@ class SimpleBadges {
 			
 			$id = $bloguser->ID;
 			$user_badges = get_user_meta( $id, 'simplebadges_badges', false );
+			$badge_winners = '';
 			
 			if ( in_array( $badge_id, $user_badges ) ) {
 				$badge_winners .= '<a href="' . get_author_posts_url( $id ) . '">' . get_avatar( $id, 30 ) . '</a>';
