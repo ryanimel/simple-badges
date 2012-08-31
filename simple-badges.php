@@ -449,6 +449,10 @@ class SimpleBadges {
 		if ( !( is_author() ) )
 			return;
 		
+		//$this->if_user_post_count( 'equal', '1', '18' );
+		//$this->if_user_post_count( 'less_than', '100', '16' );
+		//$this->if_user_post_count( 'greater_than', '0', '15' );
+		
 		if ( isset( $_GET[ '_wpnonce' ] ) ) {
 			wp_verify_nonce( $_GET[ '_wpnonce' ], 'simplebadges_nonce_url_toggle' );
 		} else {
@@ -576,30 +580,54 @@ class SimpleBadges {
 	 * 
 	 * This is to test an idea.
 	 * 
-	 * @param
+	 * @param $argument $value $badge_id
 	 */
-	public function if_user_post_count( $argument, $value ) {
+	public function if_user_post_count( $argument = 'equal', $value, $badge_id ) {
+		
+		if ( isset( $_GET[ 'badgeuser' ] ) || isset( $_GET[ 'badge' ] ) )
+			return;
 		
 		$users = get_users();
 						
-		if ( ! ( isset( $_GET[ 'badgeuser' ] ) && isset( $_GET[ 'badge' ] ) ) ) {
-							
-			foreach ( $users as $user ) {
+		foreach ( $users as $user ) {
 				
-				$badge_id = 18;
-				$user_id = $user->ID;
-				$count = count_user_posts( $user_id );
+			$user_id = $user->ID;
+			$count = count_user_posts( $user_id );
+			
+			switch ( $argument ) {
+			
+				case 'equal':
 				
-				if ( $count > '0' ) {
-									
-					$this->badge_add( $badge_id, $user_id );
+					if ( $count = $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
 				
-				}
+					break;
+					
+				case 'less_than':
 				
+					if ( $count < $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
+				
+					break;
+					
+				case 'greater_than':
+				
+					if ( $count > $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
+				
+					break;
 			}
-							
 		}
-		
+							
 	}
 	
 	
