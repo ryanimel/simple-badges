@@ -453,6 +453,8 @@ class SimpleBadges {
 		//$this->if_user_post_count( 'less_than', '100', '16' );
 		//$this->if_user_post_count( 'greater_than', '0', '15' );
 		
+		//$this->meta_query;
+		
 		if ( isset( $_GET[ '_wpnonce' ] ) ) {
 			wp_verify_nonce( $_GET[ '_wpnonce' ], 'simplebadges_nonce_url_toggle' );
 		} else {
@@ -569,6 +571,26 @@ class SimpleBadges {
 				$this->badge_remove( $badge_id, $id );
 
 			}
+			
+		}
+		
+	}
+	
+	
+	/**
+	 * Pull up meta for each badge.
+	 * 
+	 * @param
+	 */
+	function meta_query() {
+		
+		$badges = $this->badge_query();
+		
+		$badge_meta = array();
+		
+		foreach ( $badges as $badge ) {
+			
+			print_r( $badge );
 			
 		}
 		
