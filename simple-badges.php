@@ -14,8 +14,6 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 // Create a view for all badges, taking into account that some are hidden until they are awarded.
 // Start the automatically awarded badge function.
 
-
-// sb_rwi_namespace
 // Kudos to https://github.com/norcross/quick-vote for inspiring me to dive a bit deeper into plugin dev.
 
 class SimpleBadges {
@@ -359,9 +357,10 @@ class SimpleBadges {
 		
 		foreach ( $user_badges as $user_badge ) {
 			
+			$badge_post = get_post( $user_badge );
 			$badge_link = $this->badge_edit_link( $user_badge, $user_id, 'x' );
 			$badge_thumb = $this->badge_thumb( $user_badge, '50' );
-			$display .= '<li class="badge-card"><a href="' . get_permalink( $user_badge ) . '">' . $badge_thumb . '</a><h4><a href="' . get_permalink( $user_badge ) . '">' . get_the_title( $user_badge ) . '</a></h4>' . $badge_link . '<div class="desc">' . get_the_content( $user_badge ) . '</div></li>';
+			$display .= '<li class="badge-card"><a href="' . get_permalink( $user_badge ) . '">' . $badge_thumb . '</a><h4><a href="' . get_permalink( $user_badge ) . '">' . get_the_title( $user_badge ) . '</a></h4>' . $badge_link . '<div class="desc">' . $badge_post->post_content . '</div></li>';
 			
 		}
 		
