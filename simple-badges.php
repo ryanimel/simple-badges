@@ -614,4 +614,3 @@ function simplebadges_user() {
 		return $SimpleBadges->author_archive_display();
 	}
 }
-
