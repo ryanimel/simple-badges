@@ -403,18 +403,9 @@ class SimpleBadges {
 			
 			// Grab this badge's list of user IDs
 			$user_badges = get_user_meta( $badge_toggle_user_id, 'simplebadges_badges', false );
-							
-			if ( in_array( $badge_toggle_badge_id, $user_badges ) ) {
-					
-				// Let's toggle and remove the badge
-				$this->badge_remove( $badge_toggle_badge_id, $badge_toggle_user_id );
-										
-			} else {
-					
-				// Toggle and add the badge
-				$this->badge_add( $badge_toggle_badge_id, $badge_toggle_user_id );
-					
-			}
+			
+			// Toggle badge
+			$this->badge_toggle( $badge_toggle_badge_id, $badge_toggle_user_id, $user_badges );
 							
 		}
 			
@@ -449,6 +440,32 @@ class SimpleBadges {
 			
 		// Action so we can do cool stuff when this happens.
 		do_action( 'simplebadges_after_removing', $user_id, $badge_id );
+		
+	}
+	
+	
+	/**
+	 * Toggles a badge from a user.
+	 * 
+	 * Perhaps you don't know whether a user has a badge or not. This 
+	 * function will toggle it -- if it has it, will remove it, if not, 
+	 * will add it.
+	 * 
+	 * @param @badge_id @user_id
+	 */
+	private function badge_toggle( $badge_id, $user_id, $badges ) {
+		
+		if ( in_array( $badge_id, $badges ) ) {
+				
+			// Let's toggle and remove the badge
+			$this->badge_remove( $badge_id, $user_id );
+									
+		} else {
+				
+			// Toggle and add the badge
+			$this->badge_add( $badge_id, $user_id );
+				
+		}
 		
 	}
 	
