@@ -131,6 +131,7 @@ class SimpleBadges {
 	 */
 	function initialize_metaboxes() {
 
+		// Looks for the CMB class
 		if ( ! class_exists( 'cmb_Meta_Box' ) )
 			require_once 'metabox/custom-metaboxes-and-fields.php';
 
@@ -140,6 +141,7 @@ class SimpleBadges {
 	/**
 	 * Enqueue the javascript for the admin pages of this plugin.
 	 *
+	 * @static wp_enqueue_script plugins_url
 	 * @global $typenow, $pagenow
 	 */
 	public function scripts() {
@@ -399,20 +401,50 @@ class SimpleBadges {
 							
 			if ( in_array( $badge_toggle_badge_id, $user_badges ) ) {
 					
-				// Let's toggle and remove the author
-				delete_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
+				// Let's toggle and remove the badge
+				$this->badge_remove( $badge_toggle_badge_id, $badge_toggle_user_id );
 										
 			} else {
 					
-				// Toggle and add the author
-				add_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
-					
-				do_action( 'simplebadges_after_adding', $badge_toggle_user_id, $badge_toggle_badge_id );
+				// Toggle and add the badge
+				$this->badge_add( $badge_toggle_badge_id, $badge_toggle_user_id );
 					
 			}
 							
 		}
 			
+	}
+	
+	
+	/**
+	 * Adds a badge to a user.
+	 * 
+	 * @param @badge_id @user_id
+	 */
+	private function badge_add( $badge_id, $user_id) {
+		
+		// Updates user meta with badge id.
+		add_user_meta( $user_id, 'simplebadges_badges', $badge_id );
+			
+		// Action so we can do cool stuff when this happens.
+		do_action( 'simplebadges_after_adding', $user_id, $badge_id );
+		
+	}
+	
+	
+	/**
+	 * Removes a badge from a user.
+	 * 
+	 * @param @badge_id @user_id
+	 */
+	private function badge_remove( $badge_id, $user_id) {
+		
+		// Updates user meta with badge id.
+		delete_user_meta( $user_id, 'simplebadges_badges', $badge_id );
+			
+		// Action so we can do cool stuff when this happens.
+		do_action( 'simplebadges_after_removing', $user_id, $badge_id );
+		
 	}
 	
 	
