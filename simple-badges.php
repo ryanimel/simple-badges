@@ -410,7 +410,7 @@ class SimpleBadges {
 			return;
 		
 		// Checks to see if badges need updating on page load. If so, do it.
-		$this->badge_users_update();
+		$this->badge_users_pageload();
 		
 		// Get the author's slug (can't always rely on this in other ways).
 		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
@@ -445,7 +445,7 @@ class SimpleBadges {
 	 * This occurs during the display of the author archive page.
 	 * 
 	 */
-	private function badge_users_update() {
+	private function badge_users_pageload() {
 		
 		if ( isset( $_GET[ '_wpnonce' ] ) ) {
 			wp_verify_nonce( $_GET[ '_wpnonce' ], 'simplebadges_nonce_url_toggle' );
