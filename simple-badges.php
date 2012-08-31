@@ -426,33 +426,29 @@ class SimpleBadges {
 	private function badge_users_update() {
 		
 		// If true, then we can toggle based on the user and the badge info.
-		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) &&  ) {
+		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) && check_admin_referer( 'simplebadges_nonce_url' ) ) {
+
+			// Set some proper variables so we can get to work
+			$badge_toggle_user_id = $_GET[badgeuser];
+			$badge_toggle_badge_id = $_GET[badge];
 			
-			if( check_admin_referer( 'simplebadges_nonce_url' ) ) {
-				
-				// Set some proper variables so we can get to work
-				$badge_toggle_user_id = $_GET[badgeuser];
-				$badge_toggle_badge_id = $_GET[badge];
-			
-				// Grab this badge's list of user IDs
-				$user_badges = get_user_meta( $badge_toggle_user_id, 'simplebadges_badges', false );
+			// Grab this badge's list of user IDs
+			$user_badges = get_user_meta( $badge_toggle_user_id, 'simplebadges_badges', false );
 							
-				if ( in_array( $badge_toggle_badge_id, $user_badges ) ) {
+			if ( in_array( $badge_toggle_badge_id, $user_badges ) ) {
 					
-					// Let's toggle and remove the author
-					delete_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
+				// Let's toggle and remove the author
+				delete_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
 										
-				} else {
+			} else {
 					
-					// Toggle and add the author
-					add_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
+				// Toggle and add the author
+				add_user_meta( $badge_toggle_user_id, 'simplebadges_badges', $badge_toggle_badge_id );
 					
-					do_action( 'simplebadges_after_adding', $badge_toggle_user_id, $badge_toggle_badge_id );
+				do_action( 'simplebadges_after_adding', $badge_toggle_user_id, $badge_toggle_badge_id );
 					
-				}
-				
 			}
-			
+							
 		}
 			
 	}
