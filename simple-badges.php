@@ -40,8 +40,8 @@ class SimpleBadges {
 		add_theme_support( 'post-thumbnails', array( 'simplebadges_badge' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 		add_filter( 'the_content', array( $this, 'badge_post_display' ) );
-		add_action( 'init', array( $this, 'cmb_initialize_cmb_meta_boxes' ), 9999 );
-		add_filter( 'cmb_meta_boxes', array( $this, 'cmb_sample_metaboxes' ) );
+		add_action( 'init', array( $this, 'initialize_metaboxes' ), 9999 );
+		add_filter( 'cmb_meta_boxes', array( $this, 'metaboxes' ) );
 	}
 	
 	
@@ -64,7 +64,7 @@ class SimpleBadges {
 	 * @param  array $meta_boxes
 	 * @return array
 	 */
-	function cmb_sample_metaboxes( array $meta_boxes ) {
+	function metaboxes( array $meta_boxes ) {
 
 		// Start with an underscore to hide fields from custom fields list
 		$prefix = '_simplebadges_';
@@ -129,7 +129,7 @@ class SimpleBadges {
 	/**
 	 * Initialize the metabox class.
 	 */
-	function cmb_initialize_cmb_meta_boxes() {
+	function initialize_metaboxes() {
 
 		if ( ! class_exists( 'cmb_Meta_Box' ) )
 			require_once 'metabox/custom-metaboxes-and-fields.php';
