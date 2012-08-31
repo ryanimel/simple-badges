@@ -679,7 +679,7 @@ class SimpleBadges {
 			
 				case 'is_equal_to':
 				
-					if ( $count = $value ) {
+					if ( $count == $value ) {
 
 						$this->badge_add( $badge_id, $user_id );
 
@@ -713,6 +713,24 @@ class SimpleBadges {
 	
 	
 	/**
+	 * Pull a registered user's comment count based on their id.
+	 * 
+	 * @param $user_id
+	 * @return $comment_count
+	 */
+	public function get_user_comment_count( $user_id ) {
+		
+		global $wpdb;
+		$email = get_the_author_meta( 'user_email', $user_id );
+		
+		$comment_count = $wpdb->get_var('SELECT COUNT(comment_ID) FROM ' . $wpdb->comments. ' WHERE comment_author_email = "' . $email . '"');
+		
+		return $comment_count;
+		
+	}
+	
+	
+	/**
 	 * Award badges based on user comment count.
 	 * 
 	 * 
@@ -728,14 +746,15 @@ class SimpleBadges {
 		foreach ( $users as $user ) {
 				
 			$user_id = $user->ID;
-			$count = count_user_posts( $user_id );
 			
+			$count = $this->get_user_comment_count( $user_id );
+
 			switch ( $argument ) {
 			
 				case 'is_equal_to':
 				
-					if ( $count = $value ) {
-
+					if ( $count == $value ) {
+						
 						$this->badge_add( $badge_id, $user_id );
 
 					}
