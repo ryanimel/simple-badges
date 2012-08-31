@@ -274,13 +274,14 @@ class SimpleBadges {
 	 * @return $badge_link
 	 */
 	public function badge_edit_link( $badge_id, $author_id, $toggle_text ) {
-	
+		
 		if ( current_user_can( 'manage_options' ) ) {
 					
 			$badge_link_url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH ) . '?badge=' . $badge_id . '&badgeuser=' . $author_id;
-			$badge_link_url_verified = wp_nonce_url( $badge_link_url, 'simplebadges_nonce_url' );
+			$nonce = wp_create_nonce( 'simplebadges_nonce_url' );
+			$badge_link_url_verified = $badge_link_url . '?_wpnonce=' . $nonce;
 			$badge_link = '<a class="badge-toggle" href="' . $badge_link_url_verified . '">' . $toggle_text . '</a>';
-			
+		
 		}
 		
 		return $badge_link;
@@ -312,6 +313,88 @@ class SimpleBadges {
 	
 	
 	/**
+	 * Query all the badges.
+	 *
+	 * @param $ids
+	 * @return array
+	 */
+	public function badge_query( $ids ) {
+			
+		$args = array(
+			'post_type' => 'simplebadges_badge',
+			'posts_per_page' => -1,
+			'post__not_in' => $ids
+		);
+		
+		$the_query = new WP_Query( $args );
+
+		$badge_ids = array();
+
+		while ( $the_query->have_posts() ) : $the_query->the_post();
+			$badge_ids[] = get_the_ID();
+		endwhile;
+			
+		return $badge_ids;
+		
+		wp_reset_postdata();
+		
+	}
+	
+	
+	/**
+	 * Returns output for badges belonging to the user.
+	 * 
+	 * @param $user_id
+	 * @return array
+	 */
+	public function badges_owned( $user_id ) {
+		
+		// Line 'em up.
+		$user_badges = get_user_meta( $user_id, 'simplebadges_badges', false );
+		
+		$display = '';
+		
+		foreach ( $user_badges as $user_badge ) {
+			
+			$badge_link = $this->badge_edit_link( $user_badge, $user_id, 'x' );
+			$badge_thumb = $this->badge_thumb( $user_badge, '50' );
+			$display .= '<li class="badge-card"><a href="' . get_permalink( $user_badge ) . '">' . $badge_thumb . '</a><h4><a href="' . get_permalink( $user_badge ) . '">' . get_the_title( $user_badge ) . '</a></h4>' . $badge_link . '<div class="desc">' . get_the_content( $user_badge ) . '</div></li>';
+			
+		}
+		
+		return $display;
+		
+	}
+	
+	
+	/**
+	 * Returns output for badges NOT belonging to the user.
+	 * 
+	 * @param $user_id
+	 * @return array
+	 */
+	public function badges_unowned( $user_id ) {
+		
+		// Line 'em up.
+		$user_badges = get_user_meta( $user_id, 'simplebadges_badges', false );
+		$non_badges = $this->badge_query( $user_badges );
+		$display = '';
+		
+		foreach ( $non_badges as $non_badge ) {
+			
+			$badge_id = $non_badge;
+			$badge_link = $this->badge_edit_link( $badge_id, $user_id, '+' );
+			$badge_thumb = $this->badge_thumb( $badge_id, '30' );
+			$display .= '<li class="badge-card"><a href="' . get_permalink( $badge_id ) . '">' . $badge_thumb . '</a><p><a href="' . get_permalink( $badge_id ) . '">' . get_the_title( $badge_id ) . '</a></p>' . $badge_link . '</li>';
+			
+		}
+		
+		return $display;
+		
+	}
+	
+	
+	/**
 	 * Display badges on the author archive page.
 	 * 
 	 * Accepts return true/false to enable returning the output instead of echoing it.
@@ -332,46 +415,12 @@ class SimpleBadges {
 		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
 		
 		// Pull the ID from the slug.
-		$author_id = $author_slug->ID;		
-		$user_badges = get_user_meta( $author_id, 'simplebadges_badges', false );		
-		
-		// Those not belonging to the displayed user.
-		$sbargs = array(
-			'post_type' => 'simplebadges_badge',
-			'posts_per_page' => -1
-		);
+		$author_id = $author_slug->ID;				
+			
+		$owned_list = $this->badges_owned( $author_id );
+		$not_list = $this->badges_unowned( $author_id );
+		$protect_list = $this->badge_protect( $not_list );
 				
-		$sb_query = new WP_Query( $sbargs );
-		
-		while ( $sb_query->have_posts() ) :$sb_query->the_post();
-			
-			$badge_id = get_the_ID();
-			$badge_title = get_the_title( $badge_id );			
-			$badge_description = get_the_content( $badge_id );
-			$badge_permalink = get_permalink( $badge_id );
-			
-			// Build the list items
-			if ( in_array( $badge_id, $user_badges ) ) {	
-				
-				$badge_link = $this->badge_edit_link( $badge_id, $author_id, 'x' );
-				$badge_thumb = $this->badge_thumb( $badge_id, '50' );
-				$owned_list .= '<li class="badge-card"><a href="' . $badge_permalink . '">' . $badge_thumb . '</a><h4><a href="' . $badge_permalink . '">' . $badge_title . '</a></h4>' . $badge_link . '<div class="desc">' . $badge_description . '</div></li>';
-							
-			} else {
-				
-				$badge_link = $this->badge_edit_link( $badge_id, $author_id, '+' );
-				$badge_thumb = $this->badge_thumb( $badge_id, '30' );
-				$not_list .= '<li class="badge-card"><a href="' . $badge_permalink . '">' . $badge_thumb . '</a><p><a href="' . $badge_permalink . '">' . $badge_title . $badge_hidden . '</a></p>' . $badge_link . '</li>';
-			
-			}
-			
-			// Make sure the viewing user is an admin.
-			$protect_list = $this->badge_protect( $not_list );
-			
-		endwhile;
-		
-		wp_reset_postdata();
-		
 		$output = '<div class="simplebadges-list"><ul class="owned">' . $owned_list . '</ul><ul class="not">' . $protect_list . '</ul></div>';
 						
 		// Out it goes, into the world.
@@ -396,16 +445,18 @@ class SimpleBadges {
 	 */
 	private function badge_users_update() {
 		
-		// If true, then we can toggle based on the user and the badge info.
-		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) && check_admin_referer( 'simplebadges_nonce_url' ) ) {
-
+		if ( !isset( $_POST[ '_wpnonce' ] ) )
+			return;
+		
+		if ( current_user_can( 'manage_options' ) && wp_verify_nonce( $nonce, 'simplebadges_nonce_url' ) ) {
+			
 			// Set some proper variables so we can get to work
 			$user_id = $_GET[badgeuser];
 			$badge_id = $_GET[badge];
 			
 			// Toggle badge
 			$this->badge_toggle( $badge_id, $user_id );
-							
+			
 		}
 			
 	}
