@@ -279,7 +279,7 @@ class SimpleBadges {
 					
 			$badge_link_url = parse_url( $_SERVER[ 'REQUEST_URI' ], PHP_URL_PATH ) . '?badge=' . $badge_id . '&badgeuser=' . $author_id;
 			//$nonce = wp_create_nonce( 'simplebadges_nonce_url' );
-			$badge_link_url_verified = wp_nonce_url( $badge_link_url, 'simplebadges_nonce_url' );
+			$badge_link_url_verified = wp_nonce_url( $badge_link_url, 'simplebadges_nonce_url_toggle' );
 			$badge_link = '<a class="badge-toggle" href="' . $badge_link_url_verified . '">' . $toggle_text . '</a>';
 		
 		}
@@ -445,7 +445,13 @@ class SimpleBadges {
 	 */
 	private function badge_users_update() {
 		
-		if ( current_user_can( 'manage_options' ) ) {
+		if ( isset( $_GET[ '_wpnonce' ] ) ) {
+			wp_verify_nonce( $_GET[ '_wpnonce' ], 'simplebadges_nonce_url_toggle' );
+		} else {
+			return;
+		}
+			
+		if ( current_user_can( 'manage_options' ) && isset( $_GET[ 'badgeuser' ] ) && isset( $_GET[ 'badge' ] ) ) {
 			
 			// Set some proper variables so we can get to work
 			$user_id = $_GET[ 'badgeuser' ];
