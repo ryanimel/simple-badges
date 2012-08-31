@@ -285,7 +285,10 @@ class SimpleBadges {
 	
 	
 	/**
-	 * 
+	 * Permissions check for content.
+	 *
+	 * Only shows the passed content if the current viewing user is an admin.
+	 *  
 	 * @param $content
 	 * @return $content, false
 	 */
@@ -330,6 +333,7 @@ class SimpleBadges {
 		// Those not belonging to the displayed user.
 		$sbargs = array(
 			'post_type' => 'simplebadges_badge',
+			'posts_per_page' => -1
 		);
 				
 		$sb_query = new WP_Query( $sbargs );
@@ -359,6 +363,7 @@ class SimpleBadges {
 			
 			}
 			
+			// Make sure the viewing user is an admin.
 			$protect_list = $this->badge_protect( $not_list );
 			
 		endwhile;
