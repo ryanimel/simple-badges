@@ -560,8 +560,6 @@ class SimpleBadges {
 			
 		}
 		
-		// Remove this badge from every user that has it
-		
 	}
 	
 	
