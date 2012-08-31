@@ -42,6 +42,7 @@ class SimpleBadges {
 		add_filter( 'the_content', array( $this, 'badge_post_display' ) );
 		add_action( 'init', array( $this, 'initialize_metaboxes' ), 9999 );
 		add_filter( 'cmb_meta_boxes', array( $this, 'metaboxes' ) );
+		add_action( 'simplebadges_before_adding', array( $this, 'badge_roaming' ), 2, 9999 );
 	}
 	
 	
@@ -474,13 +475,13 @@ class SimpleBadges {
 	private function badge_add( $badge_id, $user_id) {
 		
 		// Action so we can do cool stuff when this happens.
-		do_action( 'simplebadges_before_adding', $user_id, $badge_id );
+		do_action( 'simplebadges_before_adding', $badge_id, $user_id );
 		
 		// Updates user meta with badge id.
 		add_user_meta( $user_id, 'simplebadges_badges', $badge_id );
 			
 		// Action so we can do cool stuff when this happens.
-		do_action( 'simplebadges_after_adding', $user_id, $badge_id );
+		do_action( 'simplebadges_after_adding', $badge_id, $user_id );
 		
 	}
 	
@@ -493,13 +494,13 @@ class SimpleBadges {
 	private function badge_remove( $badge_id, $user_id) {
 		
 		// Action so we can do cool stuff when this happens.
-		do_action( 'simplebadges_before_removing', $user_id, $badge_id );
+		do_action( 'simplebadges_before_removing', $badge_id, $user_id );
 		
 		// Updates user meta with badge id.
 		delete_user_meta( $user_id, 'simplebadges_badges', $badge_id );
 			
 		// Action so we can do cool stuff when this happens.
-		do_action( 'simplebadges_after_removing', $user_id, $badge_id );
+		do_action( 'simplebadges_after_removing', $badge_id, $user_id );
 		
 	}
 	
@@ -529,6 +530,37 @@ class SimpleBadges {
 			$this->badge_add( $badge_id, $user_id );
 				
 		}
+		
+	}
+	
+	
+	/**
+	 * Clear out other badge owners, for roaming badges.
+	 * 
+	 * 
+	 */
+	public function badge_roaming( $badge_id, $user_id ) {
+		
+		// Save the badge meta value as a variable
+		$values = get_post_custom_values( '_simplebadges_badge_details', $badge_id );
+		$roaming = 'roaming';
+		
+		// If the value = roaming, or if roaming is on
+		if ( ( $values ) && ( in_array ( $roaming, $values ) ) ) {
+			
+			$blogusers = get_users();
+
+			foreach ($blogusers as $bloguser) {
+
+				$id = $bloguser->ID;
+				// Let's toggle and remove the badge
+				$this->badge_remove( $badge_id, $id );
+
+			}
+			
+		}
+		
+		// Remove this badge from every user that has it
 		
 	}
 	
