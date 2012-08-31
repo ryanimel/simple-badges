@@ -97,8 +97,8 @@ class SimpleBadges {
 					'options' => array(
 						array( 'name' => 'User post count', 'value' => 'user_post_count', ),
 						array( 'name' => 'User comment count', 'value' => 'user_comment_count', ),
-						array( 'name' => 'User registration date', 'value' => 'user_registration_date', ),
-						array( 'name' => 'User ID', 'value' => 'user_id', ),
+						// array( 'name' => 'User registration date', 'value' => 'user_registration_date', ),
+						// 						array( 'name' => 'User ID', 'value' => 'user_id', ),
 					)
 				),
 				array(
@@ -410,7 +410,7 @@ class SimpleBadges {
 		if ( !( is_author() ) )
 			return;
 		
-		$this->meta_query();
+		$this->badge_auto_process();
 		
 		// Get the author's slug (can't always rely on this in other ways).
 		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
@@ -461,7 +461,7 @@ class SimpleBadges {
 			return;
 		}
 			
-		if ( current_user_can( 'manage_options' ) && isset( $_GET[ 'badgeuser' ] ) && isset( $_GET[ 'badge' ] ) ) {
+		if ( current_user_can( 'manage_options' ) && $this->is_badge_switching() ) {
 			
 			// Set some proper variables so we can get to work
 			$user_id = $_GET[ 'badgeuser' ];
@@ -581,6 +581,7 @@ class SimpleBadges {
 	 * Pull up meta for each badge.
 	 * 
 	 * @param
+	 * @return $meta
 	 */
 	function meta_query() {
 		
@@ -594,19 +595,62 @@ class SimpleBadges {
 			
 			if ( in_array( 'auto', $values ) ) {
 				
-				$argument = get_post_meta( $badge, '_simplebadges_badge_conditional_partone', true );
-				$conditional = get_post_meta( $badge, '_simplebadges_badge_conditional_parttwo', true );
+				$conditional = get_post_meta( $badge, '_simplebadges_badge_conditional_partone', true );
+				$argument = get_post_meta( $badge, '_simplebadges_badge_conditional_parttwo', true );
 				$value = get_post_meta( $badge, '_simplebadges_badge_conditional_partthree',  true );
 				
-				$meta = array(
-					"argument" 		=> $argument,
+				$meta[] = array(
+					"badge"			=> $badge,
 					"conditional" 	=> $conditional,
+					"argument" 		=> $argument,
 					"value" 		=> $value
 				);
 				
+				// For testing, remove any time.
 				//print_r( $meta );
 				
 			}
+			
+		}
+		
+		return $meta;
+		
+	}
+	
+	
+	/**
+	 * Run through badge meta and run conditional functions where appropriate.
+	 * 
+	 * @param
+	 */
+	function badge_auto_process() {
+		
+		$metas = $this->meta_query();
+		
+		//print_r( $metas );
+		
+		foreach ( $metas as $meta ) {
+			
+			$badge_id = $meta[ 'badge' ];
+			$conditional = $meta[ 'conditional' ];
+			$argument = $meta[ 'argument' ];
+			$value = $meta[ 'value' ];
+						
+			switch ( $conditional ) {
+				
+				case 'user_post_count':
+					
+					$this->if_user_post_count( $argument, $value, $badge_id );
+					
+					break;
+					
+				case 'user_comment_count':
+				
+					$this->if_user_comment_count( $argument, $value, $badge_id );
+				
+					break;
+			}
+			
 			
 		}
 		
@@ -614,15 +658,14 @@ class SimpleBadges {
 	
 	
 	/**
-	 * Automatically awards a badge when a user has more than one post.
+	 * Award badges based on user post count.
 	 * 
-	 * This is to test an idea.
 	 * 
 	 * @param $argument $value $badge_id
 	 */
-	public function if_user_post_count( $argument = 'equal', $value, $badge_id ) {
+	public function if_user_post_count( $argument, $value, $badge_id ) {
 		
-		if ( isset( $_GET[ 'badgeuser' ] ) || isset( $_GET[ 'badge' ] ) )
+		if ( $this->is_badge_switching() )
 			return;
 		
 		$users = get_users();
@@ -634,7 +677,7 @@ class SimpleBadges {
 			
 			switch ( $argument ) {
 			
-				case 'equal':
+				case 'is_equal_to':
 				
 					if ( $count = $value ) {
 
@@ -644,7 +687,7 @@ class SimpleBadges {
 				
 					break;
 					
-				case 'less_than':
+				case 'is_less_than':
 				
 					if ( $count < $value ) {
 
@@ -654,7 +697,7 @@ class SimpleBadges {
 				
 					break;
 					
-				case 'greater_than':
+				case 'is_greater_than':
 				
 					if ( $count > $value ) {
 
@@ -666,6 +709,79 @@ class SimpleBadges {
 			}
 		}
 							
+	}
+	
+	
+	/**
+	 * Award badges based on user comment count.
+	 * 
+	 * 
+	 * @param $argument $value $badge_id
+	 */
+	public function if_user_comment_count( $argument, $value, $badge_id ) {
+		
+		if ( $this->is_badge_switching() )
+			return;
+		
+		$users = get_users();
+						
+		foreach ( $users as $user ) {
+				
+			$user_id = $user->ID;
+			$count = count_user_posts( $user_id );
+			
+			switch ( $argument ) {
+			
+				case 'is_equal_to':
+				
+					if ( $count = $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
+				
+					break;
+					
+				case 'is_less_than':
+				
+					if ( $count < $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
+				
+					break;
+					
+				case 'is_greater_than':
+				
+					if ( $count > $value ) {
+
+						$this->badge_add( $badge_id, $user_id );
+
+					}
+				
+					break;
+			}
+		}
+							
+	}
+	
+	
+	/**
+	 * Conditional that checks whether badge toggling is taking place or not.
+	 *
+	 * @return true or false
+	 */
+	public function is_badge_switching() {
+	
+		if ( isset( $_GET[ 'badgeuser' ] ) || isset( $_GET[ 'badge' ] ) ) {
+			
+			return true;
+			
+		}
+		
+			return false;
+		
 	}
 	
 	
