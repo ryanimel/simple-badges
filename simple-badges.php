@@ -398,14 +398,14 @@ class SimpleBadges {
 		if ( current_user_can( 'manage_options' ) && isset( $_GET[badgeuser] ) && isset( $_GET[badge] ) && check_admin_referer( 'simplebadges_nonce_url' ) ) {
 
 			// Set some proper variables so we can get to work
-			$badge_toggle_user_id = $_GET[badgeuser];
-			$badge_toggle_badge_id = $_GET[badge];
+			$user_id = $_GET[badgeuser];
+			$badge_id = $_GET[badge];
 			
 			// Grab this badge's list of user IDs
-			$user_badges = get_user_meta( $badge_toggle_user_id, 'simplebadges_badges', false );
+			$badges = get_user_meta( $user_id, 'simplebadges_badges', false );
 			
 			// Toggle badge
-			$this->badge_toggle( $badge_toggle_badge_id, $badge_toggle_user_id, $user_badges );
+			$this->badge_toggle( $badge_id, $user_id, $badges );
 							
 		}
 			
