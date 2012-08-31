@@ -250,9 +250,13 @@ class SimpleBadges {
 	
 		// Locate the right small badge image
 		if ( class_exists('MultiPostThumbnails') ) {	
+			
 			$badge_image_small = MultiPostThumbnails::get_the_post_thumbnail( 'simplebadges_badge', 'simplebadges-smaller', get_the_ID(), array( $badge_dimension, $badge_dimension ) );
+		
 		} else {
+		
 			$badge_image_small = get_the_post_thumbnail( $badge_id, array( $badge_dimension, $badge_dimension ) );
+		
 		}
 		
 		return $badge_image_small;
