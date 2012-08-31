@@ -71,7 +71,7 @@ class SimpleBadges {
 
 		$meta_boxes[] = array(
 			'id'         => 'simplebadges_meta_box',
-			'title'      => 'Badge Meta',
+			'title'      => 'Badge Details',
 			'pages'      => array( 'simplebadges_badge', ), // Post type it's active on
 			'context'    => 'normal',
 			'priority'   => 'high',
