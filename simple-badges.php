@@ -38,8 +38,6 @@ class SimpleBadges {
 		// to make sure the thumbnail option displays for our badge post type
 		// via http://codex.wordpress.org/Function_Reference/add_theme_support
 		add_theme_support( 'post-thumbnails', array( 'simplebadges_badge' ) );
-		add_action( 'admin_menu', array( $this, 'metabox_add' ) );
-		add_action( 'save_post', array( $this, 'metabox_save' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'scripts' ) );
 		add_filter( 'the_content', array( $this, 'badge_post_display' ) );
 		add_action( 'init', array( $this, 'cmb_initialize_cmb_meta_boxes' ), 9999 );
@@ -69,26 +67,54 @@ class SimpleBadges {
 	function cmb_sample_metaboxes( array $meta_boxes ) {
 
 		// Start with an underscore to hide fields from custom fields list
-		$prefix = '_cmb_';
+		$prefix = '_simplebadges_';
 
 		$meta_boxes[] = array(
-			'id'         => 'test_metabox',
-			'title'      => 'Test Metabox',
-			'pages'      => array( 'simplebadges_badge', ), // Post type
+			'id'         => 'simplebadges_meta_box',
+			'title'      => 'Badge Meta',
+			'pages'      => array( 'simplebadges_badge', ), // Post type it's active on
 			'context'    => 'normal',
 			'priority'   => 'high',
 			'show_names' => true, // Show field names on the left
 			'fields'     => array(
 				array(
-					'name' => 'Test Text',
-					'desc' => 'field description (optional)',
-					'id'   => $prefix . 'test_text',
-					'type' => 'text',
+					'name' => 'Badge Details',
+					//'desc' => 'field description (optional)',
+					'id'   => $prefix . 'badge_details',
+					'type' => 'multicheck',
+					'options' => array(
+						'hide' => 'Hide badge from users until they win it.',
+						'roaming' => 'Enable Roaming: Limit this badge to one user at a time.',
+						'auto' => 'Award this badge automatically (set conditions below).',
+					),
 				),
 				array(
-					'name' => 'Test Text Small',
-					'desc' => 'field description (optional)',
-					'id'   => $prefix . 'test_textsmall',
+					'name' => 'Award badge if&hellip;',
+					//'desc' => 'field description (optional)',
+					'id'   => $prefix . 'badge_conditional_partone',
+					'type' => 'select',
+					'options' => array(
+						array( 'name' => 'User post count', 'value' => 'user_post_count', ),
+						array( 'name' => 'User comment count', 'value' => 'user_comment_count', ),
+						array( 'name' => 'User registration date', 'value' => 'user_registration_date', ),
+						array( 'name' => 'User ID', 'value' => 'user_id', ),
+					)
+				),
+				array(
+					'name' => '&hellip;is&hellip;',
+					//'desc' => 'field description (optional)',
+					'id'   => $prefix . 'badge_conditional_parttwo',
+					'type' => 'select',
+					'options' => array(
+						array( 'name' => 'equal to', 'value' => 'is_equal_to', ),
+						array( 'name' => 'less than', 'value' => 'is_less_than', ),
+						array( 'name' => 'greater than', 'value' => 'is_greater_than', ),
+					)
+				),
+				array(
+					'name' => '',
+					//'desc' => 'field description (optional)',
+					'id'   => $prefix . 'badge_conditional_partthree',
 					'type' => 'text_small',
 				),
 			),
