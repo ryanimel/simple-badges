@@ -410,6 +410,8 @@ class SimpleBadges {
 		if ( !( is_author() ) )
 			return;
 		
+		$this->meta_query();
+		
 		// Get the author's slug (can't always rely on this in other ways).
 		$author_slug = ( get_query_var( 'author_name' ) ) ? get_user_by( 'slug', get_query_var( 'author_name') ) : get_userdata( get_query_var( 'author') );
 		
@@ -452,8 +454,6 @@ class SimpleBadges {
 		//$this->if_user_post_count( 'equal', '1', '18' );
 		//$this->if_user_post_count( 'less_than', '100', '16' );
 		//$this->if_user_post_count( 'greater_than', '0', '15' );
-		
-		//$this->meta_query;
 		
 		if ( isset( $_GET[ '_wpnonce' ] ) ) {
 			wp_verify_nonce( $_GET[ '_wpnonce' ], 'simplebadges_nonce_url_toggle' );
@@ -590,7 +590,23 @@ class SimpleBadges {
 		
 		foreach ( $badges as $badge ) {
 			
-			print_r( $badge );
+			$values = get_post_custom_values( '_simplebadges_badge_details', $badge );
+			
+			if ( in_array( 'auto', $values ) ) {
+				
+				$argument = get_post_meta( $badge, '_simplebadges_badge_conditional_partone', true );
+				$conditional = get_post_meta( $badge, '_simplebadges_badge_conditional_parttwo', true );
+				$value = get_post_meta( $badge, '_simplebadges_badge_conditional_partthree',  true );
+				
+				$meta = array(
+					"argument" 		=> $argument,
+					"conditional" 	=> $conditional,
+					"value" 		=> $value
+				);
+				
+				//print_r( $meta );
+				
+			}
 			
 		}
 		
