@@ -83,6 +83,7 @@ class SimpleBadges {
 					//'desc' => 'field description (optional)',
 					'id'   => $prefix . 'badge_details',
 					'type' => 'multicheck',
+					'options' 
 					'options' => array(
 						'hide' => 'Hide badge from users until they win it.',
 						'roaming' => 'Enable Roaming: Limit this badge to one user at a time.',
@@ -98,7 +99,7 @@ class SimpleBadges {
 						array( 'name' => 'User post count', 'value' => 'user_post_count', ),
 						array( 'name' => 'User comment count', 'value' => 'user_comment_count', ),
 						// array( 'name' => 'User registration date', 'value' => 'user_registration_date', ),
-						// 						array( 'name' => 'User ID', 'value' => 'user_id', ),
+						// array( 'name' => 'User ID', 'value' => 'user_id', ),
 					)
 				),
 				array(
