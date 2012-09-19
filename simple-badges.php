@@ -629,29 +629,31 @@ class SimpleBadges {
 		
 		//print_r( $metas );
 		
-		foreach ( $metas as $meta ) {
-			
-			$badge_id = $meta[ 'badge' ];
-			$conditional = $meta[ 'conditional' ];
-			$argument = $meta[ 'argument' ];
-			$value = $meta[ 'value' ];
-						
-			switch ( $conditional ) {
-				
-				case 'user_post_count':
-					
-					$this->if_user_post_count( $argument, $value, $badge_id );
-					
-					break;
-					
-				case 'user_comment_count':
-				
-					$this->if_user_comment_count( $argument, $value, $badge_id );
-				
-					break;
-			}
-			
-			
+		if ( is_array( $metas ) ) {
+			foreach ( $metas as $meta ) {
+
+				$badge_id = $meta[ 'badge' ];
+				$conditional = $meta[ 'conditional' ];
+				$argument = $meta[ 'argument' ];
+				$value = $meta[ 'value' ];
+
+				switch ( $conditional ) {
+
+					case 'user_post_count':
+
+						$this->if_user_post_count( $argument, $value, $badge_id );
+
+						break;
+
+					case 'user_comment_count':
+
+						$this->if_user_comment_count( $argument, $value, $badge_id );
+
+						break;
+				}
+
+
+			}	
 		}
 		
 	}
