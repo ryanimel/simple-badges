@@ -83,7 +83,6 @@ class SimpleBadges {
 					//'desc' => 'field description (optional)',
 					'id'   => $prefix . 'badge_details',
 					'type' => 'multicheck',
-					'options' 
 					'options' => array(
 						'hide' => 'Hide badge from users until they win it.',
 						'roaming' => 'Enable Roaming: Limit this badge to one user at a time.',
