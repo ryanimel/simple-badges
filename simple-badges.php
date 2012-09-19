@@ -319,7 +319,7 @@ class SimpleBadges {
 	 * @param $ids
 	 * @return array
 	 */
-	public function badge_query( $ids ) {
+	public function badge_query( $ids = '' ) {
 			
 		$args = array(
 			'post_type' => 'simplebadges_badge',
@@ -593,7 +593,7 @@ class SimpleBadges {
 			
 			$values = get_post_custom_values( '_simplebadges_badge_details', $badge );
 			
-			if ( in_array( 'auto', $values ) ) {
+			if ( is_array( $values ) && in_array( 'auto', $values ) ) {
 				
 				$conditional = get_post_meta( $badge, '_simplebadges_badge_conditional_partone', true );
 				$argument = get_post_meta( $badge, '_simplebadges_badge_conditional_parttwo', true );
