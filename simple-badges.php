@@ -191,11 +191,9 @@ class SimpleBadges {
 				'show_ui' => true,
 				'show_in_nav_menus' => true,
 				'show_in_admin_bar' => false,
-				'menu_position' => 80,
+				'menu_position' => 100,
 				'menu_icon' => plugins_url( 'icon.png', __FILE__ ),
-				// TODO
 				'capabilities' => array(
-				// Cribbed from http://plugins.svn.wordpress.org/wp-help/tags/0.3/wp-help.php
 					'publish_posts' => 'manage_options',
 					'edit_posts' => 'manage_options',
 					'edit_others_posts' => 'manage_options',
@@ -684,3 +682,14 @@ function simplebadges_user() {
 		return $SimpleBadges->author_archive_display();
 	}
 }
+
+
+// Credit The Noun Project for the use of their icon in our dashboard menu.
+add_filter( 'admin_footer_text', 'rwi_simplebadges_admin_dashboard_footer' );
+
+function rwi_simplebadges_admin_dashboard_footer() {
+
+	echo 'Thank you for creating with <a href="http://wordpress.org/">WordPress</a>.<br />&ldquo;Badge&rdquo; symbol by P.J. Onori from <a href="http://thenounproject.com/">The Noun Project</a> collection.';
+
+}
+
