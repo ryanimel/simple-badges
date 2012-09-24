@@ -166,7 +166,6 @@ class SimpleBadges {
 		register_post_type( 'simplebadges_badge',
 			array(
 	 			
-				// TODO: Translations! Check http://plugins.svn.wordpress.org/wp-help/tags/0.3/wp-help.php for example.
 				'labels' => array(
 				
 					'name' => __( 'Badges' ),
@@ -191,18 +190,9 @@ class SimpleBadges {
 				'publicly_queryable' => true,
 				'show_ui' => true,
 				'show_in_nav_menus' => true,
-				'show_in_menu' => 'tools.php',
-				
-				// Note: When using 'some string' to show as a submenu of a menu page 
-				// created by a plugin, this item will become the first submenu item, 
-				// and replace the location of the top level link. If this isn't desired, 
-				// the plugin that creates the menu page needs to set the add_action priority 
-				// for admin_menu to 9 or lower. 
-				// - http://codex.wordpress.org/Function_Reference/register_post_type
-
 				'show_in_admin_bar' => false,
 				'menu_position' => 80,
-				// 'menu_icon' => URL,
+				'menu_icon' => plugins_url( 'icon.png', __FILE__ ),
 				// TODO
 				'capabilities' => array(
 				// Cribbed from http://plugins.svn.wordpress.org/wp-help/tags/0.3/wp-help.php
@@ -230,11 +220,7 @@ class SimpleBadges {
 	 		
 	 		)
 	 	);
-	 	
-	 	// flush_rewrite_rules();
-	 	// Consider doing this if public rewrites are needed. Flush only on activation, though.
-	 	// See http://codex.wordpress.org/Function_Reference/register_post_type
-	 	
+
 	}
 	
 	
